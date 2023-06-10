@@ -1,4 +1,5 @@
-﻿using Azure.Messaging.ServiceBus;
+﻿using System.Text.Json;
+using Azure.Messaging.ServiceBus;
 using CafeCommon.Models;
 
 namespace OrderService.DataAccess
@@ -20,7 +21,8 @@ namespace OrderService.DataAccess
             {
                 await using var client = new ServiceBusClient(messageConnectionString);
                 var sender = client.CreateSender(this.messageQueue);
-                var message = new ServiceBusMessage(order.Id);
+                var textMsg = JsonSerializer.Serialize(order);
+                var message = new ServiceBusMessage(textMsg);
                 await sender.SendMessageAsync(message);
             }
             catch (Exception e)
