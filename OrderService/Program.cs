@@ -1,3 +1,4 @@
+using CafeCommon.Models;
 using OrderService.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,15 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<OrderHubClient>();
+
+// Configure SignalR
+var signalRServerBuilder = builder.Services.AddSignalR();
+var azureSignalRConnectionString = builder.Configuration.GetValue<string>("AzureSignalR");
+if (!string.IsNullOrWhiteSpace(azureSignalRConnectionString))
+{
+    signalRServerBuilder.AddAzureSignalR(azureSignalRConnectionString);
+}
 
 var app = builder.Build();
 

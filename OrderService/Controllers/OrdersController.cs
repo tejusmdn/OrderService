@@ -1,6 +1,9 @@
 ﻿using CafeCommon;
+using CafeCommon.Enums;
 using CafeCommon.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Azure.SignalR;
 using OrderService.DataAccess;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -13,11 +16,14 @@ namespace OrderService.Controllers
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IMessageRepository _messageRepository;
+        private readonly OrderHubClient _hub;
 
-        public OrdersController(IOrderRepository orderRepository, IMessageRepository messageRepository)
+        public OrdersController(IOrderRepository orderRepository, 
+            IMessageRepository messageRepository, OrderHubClient hub)
         {
             _orderRepository = orderRepository;
             _messageRepository = messageRepository;
+            _hub = hub;
         }
 
         // GET: <OrderController>
@@ -43,6 +49,10 @@ namespace OrderService.Controllers
             {
                 order.Id = Guid.NewGuid().ToString();
             }
+
+            order.State = OrderState.OrderReceived;
+
+            _hub?.Publish(order);
 
             // Add Record to 
             _orderRepository.Add(order);
